@@ -1,0 +1,2 @@
+# cfn-init Rspec validation
+

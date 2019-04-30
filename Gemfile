@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+gem 'rspec'
+gem 'rake'
+gem 'pry'
+gem 'pry-rescue'
+gem 'pry-stack_explorer'
+gem 'debug_inspector', '<= 0.0.2'
+gem 'rb-readline'
