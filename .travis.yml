@@ -1,6 +1,6 @@
 ---
 language: ruby
-rvm: 2.1.9
+rvm: 2.1
 before_install:
   - gem install bundler -v "< 2" --no-ri --no-rdoc || true
   - rm Gemfile.lock || true
