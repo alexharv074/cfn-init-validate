@@ -2,6 +2,7 @@
 
 if [ ! -e 'venv' ] ; then
   virtualenv venv
+  . venv/bin/activate
   pip install -r requirements.txt
 fi
 
