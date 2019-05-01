@@ -5,11 +5,19 @@ module Boolean; end
 class TrueClass; include Boolean; end
 class FalseClass; include Boolean; end
 
+# Supporting Ruby < 2.4.
+#
 if not defined?(Fixnum)
   class Fixnum < Integer; end
 end
 
-# From:
+# This hash defines the expected format of
+# config sets in AWS::CloudFormation::Init blocks.
+#
+# Data types and regular expressions used as
+# placeholders for real values.
+#
+# Based on documentation here:
 #
 # https://docs.aws.amazon.com/AWSCloudFormation/
 #   latest/UserGuide/aws-resource-init.html
@@ -70,7 +78,12 @@ $types = {
   },
 }
 
-def config_sets(init)
+# Method: check_config_sets
+#
+# Check that a configSets block in the template
+# has the expected format.
+#
+def check_config_sets(init)
   context "configSets" do
     config_sets = init['configSets']
 
@@ -97,7 +110,15 @@ def config_sets(init)
   end
 end
 
-def check_unexpected(data_keys, spec_keys)
+# Method: check_keys
+#
+# Check that the keys in the real data are a subset of the
+# keys in the reference data $types.
+#
+# @param data_keys [Array] The actual keys.
+# @param spec_keys [Array] The keys in $types.
+#
+def check_keys(data_keys, spec_keys)
   context data_keys do
     if spec_keys == [String] or spec_keys.first.is_a?(Regexp)
       it "should all match String" do
@@ -111,9 +132,18 @@ def check_unexpected(data_keys, spec_keys)
   end
 end
 
+# Method: compare
+#
+# Recursively compare real blocks in a CloudFormation template
+# with the spec defined in $types.
+#
+# @param data [Hash] The real data in the template.
+# @param spec [Hash] The reference data corresponding to this
+#                    key in $types.
+#
 def compare(data, spec)
   if spec.is_a?(Hash)
-    check_unexpected(data.keys, spec.keys)
+    check_keys(data.keys, spec.keys)
   end
   data.each do |k,v|
     context k do
@@ -121,19 +151,22 @@ def compare(data, spec)
         it "#{k} should match Array" do
           expect(v.class).to eq Array
         end
+
       elsif spec[k] == Hash
         it "#{k} should match Hash" do
           expect(v.class).to eq Hash
         end
+
       elsif spec == {String => Array} or
             spec == {String => String}
         it "#{k}=>#{v} should match #{spec}" do
           expect(k.class).to eq spec.keys.first
           expect(v.class).to eq spec[spec.keys.first]
         end
+
       elsif spec.has_key?(k)
         if v.is_a?(Hash)
-          compare(v, spec[k])
+          compare(v, spec[k]) # recurse.
         else
           spec_key = spec.keys.first
           if spec_key.is_a?(Regexp)
@@ -152,9 +185,11 @@ def compare(data, spec)
             end
           end
         end
+
       elsif v.is_a?(Hash)
         spec_key = spec.keys.first
-        compare(v, spec[spec_key])
+        compare(v, spec[spec_key]) # recurse.
+
       else
         raise "Something went wrong"
       end
@@ -162,9 +197,14 @@ def compare(data, spec)
   end
 end
 
+# Method: validate
+#
+# A wrapper around the compare() and check_config_sets()
+# methods.
+#
 def validate(init)
   if init.has_key?('configSets')
-    config_sets(init)
+    check_config_sets(init)
   end
   init.each do |config,config_data|
     next if config == 'configSets'
@@ -174,6 +214,8 @@ def validate(init)
   end
 end
 
+# Method: validate_resource
+#
 def validate_resource(name, resource)
   allowed = %w{
     AWS::EC2::Instance AWS::AutoScaling::LaunchConfiguration
