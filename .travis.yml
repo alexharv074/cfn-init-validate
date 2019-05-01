@@ -4,8 +4,7 @@ rvm: 2.1
 before_install:
   - gem install bundler -v "< 2" --no-ri --no-rdoc || true
   - rm Gemfile.lock || true
-bundler_args: --without system_tests
-script: "bash test_runner.sh"
+script: make
 notifications:
   email:
     recipients:
