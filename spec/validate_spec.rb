@@ -167,22 +167,26 @@ def compare(data, spec)
       elsif spec.has_key?(k)
         if v.is_a?(Hash)
           compare(v, spec[k]) # recurse.
-        else
-          spec_key = spec.keys.first
-          if spec_key.is_a?(Regexp)
-            it "#{k} should match #{spec_key}" do
-              expect(k).to match spec_key
-            end
-          elsif spec_key.is_a?(String)
-            it "#{k} should match #{spec_key}" do
-              expect(k.class).to eq String
-            end
-          elsif [Array, String,
-                 Fixnum, TrueClass,
-                 FalseClass].include?(v.class)
-            it "#{v} should be a #{spec[k]}" do
-              expect(v.class).to be_a spec[k]
-            end
+        elsif spec[k].is_a?(Regexp)
+          it "#{k} should match #{spec[k]}" do
+            expect(v).to match spec[k]
+          end
+        elsif spec[k] == String
+
+          # Actually, an Array of Strings joined by CloudFormation
+          # is also okay.
+          #
+          it "#{k} should match #{spec[k]}" do
+            expect([String, Array].include?(v.class)).to be true
+          end
+        elsif spec[k] == Fixnum
+          it "#{k} should match (or be cast to) #{spec[k]}" do
+            expect { v.to_i }.to_not raise_error
+          end
+        elsif [Array, TrueClass, FalseClass]
+            .include?(v.class)
+          it "#{v} should be a #{spec[k]}" do
+            expect(v).to be_a spec[k]
           end
         end
 
