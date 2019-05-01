@@ -34,4 +34,6 @@ do
   bundle exec rspec spec/validate_spec.rb || exit $?
 done
 
+set +x
+
 echo "All tests passed."

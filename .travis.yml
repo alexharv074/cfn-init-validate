@@ -1,0 +1,14 @@
+---
+language: ruby
+rvm: 2.1.9
+before_install:
+  - gem install bundler -v "< 2" --no-ri --no-rdoc || true
+  - rm Gemfile.lock || true
+bundler_args: --without system_tests
+script: "bash test_runner.sh"
+notifications:
+  email:
+    recipients:
+      - 'alexharv074@gmail.com'
+    on_success: never
+    on_failure: always
