@@ -35,6 +35,10 @@ To validate your own CloudFormation template:
 
 Or, just fork this project and use `spec/validate_spec.rb` in your own project.
 
+## Known issues
+
+Use of If conditionals to populate fields within the AWS::CloudFormation::Init config will cause fields to appears as Arrays instead of Booleans etc. For example, [here](https://github.com/widdix/aws-cf-templates/blob/master/ec2/ec2-auto-recovery.yaml#L540-L541).
+
 ## License
 
 MIT.
