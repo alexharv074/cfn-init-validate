@@ -5,7 +5,7 @@ if [ ! -e 'venv' ] ; then
   pip install -r requirements.txt
 fi
 
-if ! which -s cfn-flip ; then
+if ! which cfn-flip > /dev/null ; then
   . venv/bin/activate
 fi
 
